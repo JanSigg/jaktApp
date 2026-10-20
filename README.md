@@ -4,6 +4,10 @@ En enkel nettapp for å markere observasjoner og steder på et kart mens du er p
 
 Prototypen er laget som en skoleoppgave.
 
+**Prøv appen her:** <https://jansigg.github.io/jaktApp/>
+
+Appen virker både på mobil og PC. For å bruke «Min posisjon» må du gi nettleseren tilgang til posisjonen din.
+
 ## Formål
 
 På tur og jakt er det nyttig å huske hvor du så rypa, hvor elgen ble felt eller hvor posten står. Appen gjør det raskt å legge inn slike punkter på kartet fra mobilen, og samler dem i en liste du kan bla i etterpå.
