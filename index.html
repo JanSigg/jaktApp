@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Marker observasjoner og steder på kartet mens du er på tur eller jakt.">
+  <meta name="theme-color" content="#1E3B2F">
+  <title>Tur- og jaktlogg</title>
+
+  <!-- Leaflet (kartbiblioteket) hentes fra CDN. integrity sjekker at filen ikke er endret. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <!-- Skrifttypen Barlow. Uten nett faller siden tilbake til systemskriften. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topplinje">
+    <h1>Tur- og jaktlogg</h1>
+    <button id="vis-liste" class="knapp knapp--topp" type="button"
+            aria-controls="liste-panel" aria-expanded="false">
+      Liste <span id="antall-totalt" class="teller">0</span>
+    </button>
+  </header>
+
+  <main class="hoved">
+    <!-- Leaflet tegner kartet inn i denne boksen -->
+    <div id="kart" class="kart"></div>
+
+    <!-- Meldinger som «Registreringen er lagret» og feilmeldinger -->
+    <div id="melding" class="melding" role="status" aria-live="polite" hidden>
+      <p id="melding-tekst"></p>
+      <button id="lukk-melding" class="ikonknapp" type="button" aria-label="Lukk meldingen">×</button>
+    </div>
+
+    <div class="bunnlinje">
+      <p id="hint" class="hint">Trykk på kartet der du vil registrere en observasjon eller et sted.</p>
+      <button id="min-posisjon" class="knapp knapp--posisjon" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+          <path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span id="min-posisjon-tekst">Min posisjon</span>
+      </button>
+    </div>
+
+    <!-- Listen over registreringer. inert = kan ikke brukes mens den er lukket. -->
+    <aside id="liste-panel" class="liste-panel" aria-labelledby="liste-tittel" inert>
+      <div class="liste-panel__topp">
+        <h2 id="liste-tittel">Registreringer</h2>
+        <button id="lukk-liste" class="ikonknapp" type="button" aria-label="Lukk listen">×</button>
+      </div>
+      <label class="filter">
+        <span>Vis</span>
+        <select id="filter-type">
+          <option value="">Alle typer</option>
+          <!-- Én option per type legges til av app.js -->
+        </select>
+      </label>
+      <ul id="liste" class="liste"></ul>
+      <p id="liste-tom" class="liste-tom" hidden></p>
+    </aside>
+  </main>
+
+  <!-- Skjemaet for ny registrering og redigering. Vises som et vindu over kartet. -->
+  <dialog id="skjema-dialog" class="dialog" aria-labelledby="skjema-tittel">
+    <form id="skjema" novalidate>
+      <div>
+        <!-- autofocus på tittelen gjør at ingen type ser ut som valgt når skjemaet åpnes -->
+        <h2 id="skjema-tittel" tabindex="-1" autofocus>Ny registrering</h2>
+        <p id="skjema-posisjon" class="posisjon-tekst"></p>
+      </div>
+
+      <fieldset class="skjemafelt" aria-describedby="feil-type">
+        <legend>Type</legend>
+        <div id="type-valg" class="type-valg">
+          <!-- Én knapp per type legges til av app.js -->
+        </div>
+        <p id="feil-type" class="feilmelding"></p>
+      </fieldset>
+
+      <!-- Vises bare når typen er vilt -->
+      <fieldset id="hendelse-felt" class="skjemafelt" hidden disabled>
+        <legend>Hendelse</legend>
+        <div class="segment">
+          <label><input type="radio" name="hendelse" value="Observert" checked><span>Observert</span></label>
+          <label><input type="radio" name="hendelse" value="Felt"><span>Felt</span></label>
+        </div>
+      </fieldset>
+
+      <div class="skjemafelt">
+        <label for="antall">Antall</label>
+        <input id="antall" name="antall" class="antall" type="number" inputmode="numeric"
+               min="1" step="1" aria-describedby="feil-antall">
+        <p id="feil-antall" class="feilmelding"></p>
+      </div>
+
+      <div class="to-kolonner">
+        <div class="skjemafelt">
+          <label for="dato">Dato</label>
+          <input id="dato" name="dato" type="date" aria-describedby="feil-dato">
+          <p id="feil-dato" class="feilmelding"></p>
+        </div>
+        <div class="skjemafelt">
+          <label for="klokkeslett">Klokkeslett</label>
+          <input id="klokkeslett" name="klokkeslett" type="time" aria-describedby="feil-klokkeslett">
+          <p id="feil-klokkeslett" class="feilmelding"></p>
+        </div>
+      </div>
+
+      <div class="skjemafelt">
+        <label for="notat">Notat <span class="valgfritt">(valgfritt)</span></label>
+        <textarea id="notat" name="notat" rows="3" maxlength="500"></textarea>
+      </div>
+
+      <p id="feil-lagring" class="feilmelding" role="alert"></p>
+
+      <div class="skjema-knapper">
+        <button id="avbryt" class="knapp knapp--sekundar" type="button">Avbryt</button>
+        <button id="lagre" class="knapp knapp--primar" type="submit">Lagre registrering</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

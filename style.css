@@ -1,0 +1,691 @@
+/* Tur- og jaktlogg – stil
+   Laget for mobil først. Farger og skrift er samlet som variabler her øverst. */
+
+:root {
+  --granskog: #1E3B2F;      /* mørk grønn: topplinje og valgt hendelse */
+  --signal: #D04E0A;        /* signaloransje, som på jaktklær: hovedknapper og valgt type */
+  --signal-mork: #A93E05;
+  --signal-lys: #FCE9DD;
+  --lav: #EEF1E8;           /* lys grønngrå bakgrunn */
+  --strek: #D3D9CD;         /* rammer og skillelinjer */
+  --tekst: #1F2620;
+  --tekst-dempet: #5B6660;
+  --feil: #B3261E;
+  --hvit: #FFFFFF;
+
+  --skrift: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --skrift-smal: 'Barlow Semi Condensed', var(--skrift);
+  --radius: 10px;
+  --skygge: 0 2px 8px rgb(20 35 28 / 0.28);
+
+  color-scheme: light;
+}
+
+/* ---------- Grunnoppsett ---------- */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Sørger for at hidden-attributtet alltid skjuler, selv om en klasse setter display */
+[hidden] {
+  display: none !important;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  height: 100dvh; /* dvh tar hensyn til adresselinjen på mobil */
+  display: flex;
+  flex-direction: column;
+  background: var(--granskog);
+  color: var(--tekst);
+  font-family: var(--skrift);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+h1, h2 {
+  margin: 0;
+  font-family: var(--skrift-smal);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* ---------- Topplinje ---------- */
+
+.topplinje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  padding-top: max(8px, env(safe-area-inset-top));
+  background: var(--granskog);
+  color: var(--hvit);
+  border-bottom: 4px solid var(--signal);
+}
+
+.topplinje h1 {
+  font-size: 1.375rem;
+}
+
+.teller {
+  min-width: 1.75em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--hvit);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ---------- Knapper ---------- */
+
+.knapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.knapp:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.knapp--primar,
+.knapp--posisjon {
+  background: var(--signal);
+  color: var(--hvit);
+}
+
+.knapp--primar:hover,
+.knapp--posisjon:hover {
+  background: var(--signal-mork);
+}
+
+.knapp--primar:focus-visible,
+.knapp--posisjon:focus-visible {
+  outline-color: var(--granskog);
+}
+
+.knapp--sekundar {
+  background: var(--hvit);
+  border-color: var(--strek);
+  color: var(--tekst);
+}
+
+.knapp--sekundar:hover {
+  background: var(--lav);
+}
+
+.knapp--topp {
+  min-height: 44px;
+  padding: 0 12px;
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.45);
+  color: var(--hvit);
+}
+
+.knapp--topp:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.knapp--topp:focus-visible {
+  outline-color: var(--hvit);
+}
+
+.knapp--liten {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 0.9375rem;
+}
+
+.knapp--fare {
+  color: var(--feil);
+}
+
+.ikonknapp {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ikonknapp:hover {
+  background: rgb(0 0 0 / 0.08);
+}
+
+/* ---------- Kart ---------- */
+
+.hoved {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.kart {
+  position: absolute;
+  inset: 0;
+  background: var(--lav);
+}
+
+/* Leaflet bruker sin egen skrift som standard. Vi vil ha appens skrift. */
+.leaflet-container {
+  font: inherit;
+}
+
+/* Markør: hvit sirkel med farget ring og symbol for typen */
+.symbol {
+  --farge: #6B6B6B;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 4px solid var(--farge);
+  border-radius: 50%;
+  background: var(--hvit);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.markor {
+  border-radius: 50%; /* gir rund fokusramme når du bruker tastatur */
+}
+
+.markor .symbol {
+  box-shadow: 0 1px 5px rgb(0 0 0 / 0.45);
+}
+
+/* Det midlertidige punktet som vises mens skjemaet er åpent */
+.ny-punkt {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 4px solid var(--signal);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: 0 0 0 2px var(--hvit);
+}
+
+/* Innhold i boblen som åpnes når du trykker på en markør */
+.leaflet-popup-content {
+  margin: 14px 16px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.popup {
+  min-width: 190px;
+}
+
+.leaflet-popup-content .popup p {
+  margin: 2px 0;
+}
+
+.popup__tittel {
+  font-family: var(--skrift-smal);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.popup__dempet {
+  color: var(--tekst-dempet);
+}
+
+.popup__notat {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.popup__knapper {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ---------- Hint og Min posisjon ---------- */
+
+.bunnlinje {
+  position: absolute;
+  z-index: 1000;
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none; /* klikk går gjennom til kartet, unntatt på hint og knapp */
+}
+
+.bunnlinje > * {
+  pointer-events: auto;
+}
+
+.hint {
+  max-width: 20rem;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--hvit);
+  box-shadow: var(--skygge);
+  font-size: 0.9375rem;
+}
+
+.knapp--posisjon {
+  flex: none;
+  margin-left: auto;
+  min-height: 52px;
+  padding: 0 20px 0 16px;
+  border-radius: 999px;
+  box-shadow: var(--skygge);
+}
+
+/* ---------- Meldinger ---------- */
+
+.melding {
+  position: absolute;
+  z-index: 1200;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100% - 24px, 30rem);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 6px 10px 16px;
+  border-radius: var(--radius);
+  background: var(--granskog);
+  color: var(--hvit);
+  box-shadow: var(--skygge);
+}
+
+.melding p {
+  flex: 1;
+  margin: 0;
+  padding-top: 8px;
+}
+
+.melding--feil {
+  background: var(--hvit);
+  color: var(--feil);
+  border: 2px solid var(--feil);
+  border-left-width: 8px;
+  font-weight: 600;
+}
+
+/* ---------- Listen ---------- */
+
+/* På mobil glir listen opp fra bunnen */
+.liste-panel {
+  position: absolute;
+  z-index: 1100;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: 16px 16px 0 0;
+  background: var(--hvit);
+  box-shadow: 0 -4px 18px rgb(20 35 28 / 0.3);
+  transform: translateY(105%);
+  visibility: hidden;
+  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.liste-panel.apen {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.25s ease;
+}
+
+/* På større skjermer ligger listen som et panel til høyre */
+@media (min-width: 900px) {
+  .liste-panel {
+    top: 0;
+    left: auto;
+    width: 380px;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: -4px 0 18px rgb(20 35 28 / 0.25);
+    transform: translateX(105%);
+  }
+}
+
+.liste-panel__topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px 4px 16px;
+}
+
+.liste-panel__topp h2 {
+  font-size: 1.375rem;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 16px 12px;
+  font-weight: 600;
+}
+
+select {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 2px solid var(--strek);
+  border-radius: var(--radius);
+  background: var(--hvit);
+  color: var(--tekst);
+  font: inherit;
+}
+
+.liste {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border-top: 1px solid var(--strek);
+}
+
+.rad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px 4px 4px;
+  border-bottom: 1px solid var(--strek);
+}
+
+.rad__vis {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rad__vis:hover {
+  background: var(--lav);
+}
+
+.rad__tekst {
+  min-width: 0;
+}
+
+.rad__tittel {
+  display: block;
+  font-weight: 600;
+}
+
+.rad__meta {
+  display: block;
+  color: var(--tekst-dempet);
+  font-size: 0.9375rem;
+}
+
+.rad__notat {
+  display: -webkit-box;
+  margin-top: 2px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.rad__handlinger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.liste-tom {
+  margin: 0;
+  padding: 20px 16px 28px;
+  color: var(--tekst-dempet);
+}
+
+/* ---------- Skjema ---------- */
+
+.dialog {
+  width: min(100% - 16px, 32rem);
+  max-width: none;
+  max-height: calc(100% - 16px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--hvit);
+  color: var(--tekst);
+  box-shadow: 0 8px 30px rgb(20 35 28 / 0.35);
+}
+
+.dialog::backdrop {
+  background: rgb(20 35 28 / 0.45);
+}
+
+/* På smale skjermer legger skjemaet seg nederst, nær tommelen */
+@media (max-width: 599px) {
+  .dialog {
+    margin-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+.dialog form {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.dialog h2 {
+  font-size: 1.5rem;
+}
+
+.dialog h2:focus {
+  outline: none; /* tittelen får fokus når skjemaet åpnes, men er ingen knapp */
+}
+
+.posisjon-tekst {
+  margin: 4px 0 0;
+  color: var(--tekst-dempet);
+  font-size: 0.875rem;
+}
+
+.skjemafelt {
+  display: grid;
+  align-content: start; /* holder feltene på linje selv om naboen har en feilmelding */
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.skjemafelt legend,
+.skjemafelt > label {
+  padding: 0;
+  font-weight: 600;
+}
+
+.skjemafelt legend {
+  margin-bottom: 6px;
+}
+
+.valgfritt {
+  color: var(--tekst-dempet);
+  font-weight: 400;
+}
+
+.skjemafelt input,
+.skjemafelt textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 2px solid var(--strek);
+  border-radius: var(--radius);
+  background: var(--hvit);
+  color: var(--tekst);
+  font: inherit;
+}
+
+.skjemafelt textarea {
+  resize: vertical;
+}
+
+.skjemafelt input[aria-invalid="true"] {
+  border-color: var(--feil);
+}
+
+.antall {
+  max-width: 8rem;
+}
+
+.to-kolonner {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 12px;
+}
+
+.feilmelding {
+  margin: 0;
+  color: var(--feil);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.feilmelding:empty {
+  display: none;
+}
+
+/* Typevalg: radioknapper som ser ut som fliser med samme symbol som markøren */
+.type-valg {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: 8px;
+}
+
+.type-flis {
+  position: relative;
+  display: grid;
+}
+
+/* Selve radioknappen er usynlig, men ligger over flisen så den kan trykkes og få fokus */
+.type-flis input,
+.segment input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.type-flis__innhold {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  padding: 10px 4px 8px;
+  border: 2px solid var(--strek);
+  border-radius: var(--radius);
+  font-family: var(--skrift-smal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.type-flis input:checked + .type-flis__innhold {
+  border-color: var(--signal);
+  background: var(--signal-lys);
+}
+
+.type-flis input:focus-visible + .type-flis__innhold {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Hendelse: to knapper ved siden av hverandre */
+.segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 2px solid var(--strek);
+  border-radius: var(--radius);
+}
+
+.segment label {
+  position: relative;
+}
+
+.segment label + label {
+  border-left: 2px solid var(--strek);
+}
+
+.segment span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.segment input:checked + span {
+  background: var(--granskog);
+  color: var(--hvit);
+}
+
+.segment input:focus-visible + span {
+  box-shadow: inset 0 0 0 3px var(--signal);
+}
+
+.skjema-knapper {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+}
+
+/* ---------- Mindre bevegelse for de som har bedt om det ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .liste-panel,
+  .liste-panel.apen {
+    transition: none;
+  }
+}
